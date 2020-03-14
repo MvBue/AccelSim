@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/michi/Dev/AccelSim_clean/src/Body.cpp" "/home/michi/Dev/AccelSim_clean/CMakeFiles/AccelSim.dir/src/Body.cpp.o"
-  "/home/michi/Dev/AccelSim_clean/src/Main.cpp" "/home/michi/Dev/AccelSim_clean/CMakeFiles/AccelSim.dir/src/Main.cpp.o"
+  "/home/michi/Dev/AccelSim/src/Body.cpp" "/home/michi/Dev/AccelSim/CMakeFiles/AccelSim.dir/src/Body.cpp.o"
+  "/home/michi/Dev/AccelSim/src/Main.cpp" "/home/michi/Dev/AccelSim/CMakeFiles/AccelSim.dir/src/Main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

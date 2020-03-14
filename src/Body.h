@@ -8,6 +8,7 @@ private:
     Eigen::Vector3f x_ddot;
     Eigen::Quaternion<float> q_r;
     Eigen::Matrix3f T_VEL;
+    Eigen::Vector3f e_z;
     
 public:
     Body();

@@ -10,6 +10,7 @@ Body::Body()
     x_ddot << 0.0f,0.0f,0.0f;
     //Declare constants
     T_VEL << 0,1,0,-1,0,0,0,0,0;
+    e_z << 0,0,1;
 }
 
 Body::Body(float xi=0.0f, float yi=0.0f, float phii=0.0f, float x_doti=0.0f, float y_doti=0.0f, 
@@ -55,12 +56,12 @@ Eigen::Vector3f Body::get_x_dot()
 
 Eigen::Vector3f Body::get_x_ddot()
 {
-    return x;
+    return x_ddot;
 }
 
 void Body::advance(float dt)
 {
-    q_r = Eigen::AngleAxis<float>(x[2], Eigen::Vector3f(0,0,1));
+    q_r = Eigen::AngleAxis<float>(x[2], e_z);
     x_dot = x_dot + (x_ddot + x_dot[2] * T_VEL * x_dot) * dt;
     x = x + q_r * x_dot * dt;
 }

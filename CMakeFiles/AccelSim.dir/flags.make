@@ -6,5 +6,5 @@ CXX_FLAGS =  -Wall -Werror -std=c++14 -g
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/michi/Dev/AccelSim_clean/Dependencies/eigen-3.3.7 -I/home/michi/Dev/AccelSim_clean/Dependencies/boost/include 
+CXX_INCLUDES = -I/home/michi/Dev/AccelSim/Dependencies/eigen-3.3.7 -I/home/michi/Dev/AccelSim/Dependencies/boost/include 
 
