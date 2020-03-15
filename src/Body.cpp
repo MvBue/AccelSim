@@ -1,8 +1,6 @@
 #include <Eigen/Dense>
 #include "Body.h"
 
-#include <iostream>
-
 Body::Body()
 {
     x << 0.0f,0.0f,0.0f;

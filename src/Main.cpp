@@ -1,31 +1,23 @@
-#include <iostream>
-#include <unistd.h>
 #include <Eigen/Dense>
 #include <boost/tuple/tuple.hpp>
-
-#include <vector>
-#include <utility>
+#include <boost/thread.hpp>
 #include "gnuplot-iostream.h"
 
 #include "Body.h"
 
-using namespace Eigen;
-
 float get_ddy(int &i)
 {
     float y;
-    
-//    y = 10.0 * sin(float(i)/100.0f*2.0f*M_PI);
-    
-    if (i < 300)
+    if (i < 500)
     {
-        y = i * 10.0f / 300.0f;
-    }
-    else
+        y = i * 10.0f / 500.0f;
+    }else if (i < 1000)
+    {
+        y = 10.0f - (i - 500) * 10.0f / 500.0f;
+    }else
     {
         y = 0.0f;
     }
-    
     return y;
 }
 
@@ -72,30 +64,30 @@ int main()
     B.set_x_ddot(0,get_ddy(temp),0);
         
 //  Start simulation
-    int sim_steps = 801;
+    int sim_steps = 1501;
     float sim_dt = 0.01;
     float sim_time = 0;
     
-    Vector3f x_i = B.get_x();
-    Vector3f x_dot_i = B.get_x_dot();
-    Vector3f x_ddot_i = B.get_x_ddot();
-    Vector3f e_x(1,0,0);
-    Vector3f e_z(0,0,1);
-    Vector3f origin_vec; 
-    Vector3f v_abs_vec;
-    Vector3f heading;
-    Vector3f x_ddot_vec;
-    Vector3f e_x_T;
-    Vector3f beta_dot;
+    Eigen::Vector3f x_i = B.get_x();
+    Eigen::Vector3f x_dot_i = B.get_x_dot();
+    Eigen::Vector3f x_ddot_i = B.get_x_ddot();
+    Eigen::Vector3f e_x(1,0,0);
+    Eigen::Vector3f e_z(0,0,1);
+    Eigen::Vector3f origin_vec; 
+    Eigen::Vector3f v_abs_vec;
+    Eigen::Vector3f heading;
+    Eigen::Vector3f x_ddot_vec;
+    Eigen::Vector3f e_x_T;
+    Eigen::Vector3f beta_dot;
     Eigen::Quaternion<float> q_r;
     Eigen::Quaternion<float> q_90;
-    q_r = AngleAxis<float>(x_i[2], e_z);
-    q_90 = AngleAxis<float>(M_PI/2.0, e_z);
-    Matrix3f R_get_xy;
+    q_r = Eigen::AngleAxis<float>(x_i[2], e_z);
+    q_90 = Eigen::AngleAxis<float>(M_PI/2.0, e_z);
+    Eigen::Matrix3f R_get_xy;
     R_get_xy << 1,0,0,
                 0,1,0,
                 0,0,0;
-    Matrix3f R_get_z;
+    Eigen::Matrix3f R_get_z;
     R_get_z << 0,0,0,
                 0,0,0,
                 0,0,1;
@@ -112,7 +104,7 @@ int main()
         x_dot_i = B.get_x_dot();
         x_ddot_i = B.get_x_ddot();
         origin_vec = -1.0 * R_get_xy * x_i;
-        q_r = AngleAxis<float>(x_i[2], e_z);
+        q_r = Eigen::AngleAxis<float>(x_i[2], e_z);
         x_ddot_vec = q_r * R_get_xy * x_ddot_i;
         v_abs_vec = q_r * R_get_xy * x_dot_i;
         heading = q_r * e_x;
@@ -153,8 +145,9 @@ int main()
         }
         
         
-//        ddphi = k_p * alpha - k_d * alpha_dot;
-        ddphi = k_p * beta + k_d * beta_dot[2];
+        ddphi = k_p * alpha - k_d * alpha_dot;
+//        ddphi = k_p * beta + k_d * beta_dot[2];
+//        ddphi = k_p * (5*alpha + beta) + k_d * (beta_dot[2] - 5*alpha_dot);
 //        float dot = x_i[0]*x_i[1] + 
         
         B.set_x_ddot(0,get_ddy(i),ddphi);

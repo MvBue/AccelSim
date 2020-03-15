@@ -1,4 +1,4 @@
-#include <Eigen/Dense>
+#pragma once
 
 class Body
 {
