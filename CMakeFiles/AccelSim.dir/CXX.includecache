@@ -6,25 +6,31 @@
 
 #IncludeRegexTransform: 
 
-/home/michi/Dev/AccelSim/src/Body.cpp
+/home/michi/Dev/AccelSim/src/Body.h
 Eigen/Dense
 -
-Body.h
-/home/michi/Dev/AccelSim/src/Body.h
-
-/home/michi/Dev/AccelSim/src/Body.h
 
 /home/michi/Dev/AccelSim/src/Main.cpp
-Eigen/Dense
+iostream
 -
-boost/tuple/tuple.hpp
+Eigen/Dense
 -
 boost/thread.hpp
 -
-gnuplot-iostream.h
-/home/michi/Dev/AccelSim/src/gnuplot-iostream.h
 Body.h
 /home/michi/Dev/AccelSim/src/Body.h
+PlotSim.h
+/home/michi/Dev/AccelSim/src/PlotSim.h
+
+/home/michi/Dev/AccelSim/src/PlotSim.h
+Body.h
+/home/michi/Dev/AccelSim/src/Body.h
+boost/tuple/tuple.hpp
+-
+gnuplot-iostream.h
+/home/michi/Dev/AccelSim/src/gnuplot-iostream.h
+Eigen/Dense
+-
 
 /home/michi/Dev/AccelSim/src/gnuplot-iostream.h
 cstdio

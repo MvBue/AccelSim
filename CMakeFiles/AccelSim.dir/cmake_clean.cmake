@@ -3,6 +3,7 @@ file(REMOVE_RECURSE
   "AccelSim.pdb"
   "CMakeFiles/AccelSim.dir/src/Body.cpp.o"
   "CMakeFiles/AccelSim.dir/src/Main.cpp.o"
+  "CMakeFiles/AccelSim.dir/src/PlotSim.cpp.o"
 )
 
 # Per-language clean rules from dependency scanning.

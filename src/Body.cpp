@@ -1,65 +1,90 @@
-#include <Eigen/Dense>
 #include "Body.h"
+
 
 Body::Body()
 {
-    x << 0.0f,0.0f,0.0f;
-    x_dot << 0.0f,0.0f,0.0f; 
-    x_ddot << 0.0f,0.0f,0.0f;
+    I_r_IB << 0.0f, 0.0f, 0.0f;
+    I_phi_IB << 0.0f, 0.0f, 0.0f;
+    B_v_IB << 0.0f, 0.0f, 0.0f;
+    I_omega_IB << 0.0f, 0.0f, 0.0f;
+    B_a_IB << 0.0f, 0.0f, 0.0f;
+    I_psi_IB << 0.0f, 0.0f, 0.0f;
+
     //Declare constants
-    T_VEL << 0,1,0,-1,0,0,0,0,0;
-    e_z << 0,0,1;
+    e_z << 0.0f, 0.0f, 1.0f;
 }
 
-Body::Body(float xi=0.0f, float yi=0.0f, float phii=0.0f, float x_doti=0.0f, float y_doti=0.0f, 
-float phi_doti=0.0f, float x_ddoti=0.0f, float y_ddoti=0.0f, float phi_ddoti=0.0f)
+Body::Body(float xi = 0.0f, float yi = 0.0f, float phii = 0.0f, float v_xi = 0.0f, float v_yi = 0.0f, 
+    float omegai = 0.0f, float a_xi = 0.0f, float a_yi = 0.0f, float psii = 0.0f)
 {
-    x << xi , yi , phii;
-    x_dot << x_doti, y_doti, phi_doti; 
-    x_ddot << x_ddoti, y_ddoti, phi_ddoti;
-    //Declare constants
-    T_VEL << 0,1,0,-1,0,0,0,0,0;
+    I_r_IB << xi, yi, 0.0f;
+    I_phi_IB << 0.0f, 0.0f, phii;
+    B_v_IB << v_xi, v_yi, 0.0f;
+    I_omega_IB << 0.0f, 0.0f, omegai;
+    B_a_IB << a_xi, a_yi, 0.0f;
+    I_psi_IB << 0.0f, 0.0f, psii;
 };
 
 void Body::display() 
 {
-    printf("x:%.3f, y:%.3f, phi:%.3f, vx:%.3f, vy:%.3f, vphi:%.3f, ax:%.3f, ay:%.3f, aphi:%.3f\n", 
-    x(0), x(1), x(2), x_dot(0), x_dot(1), x_dot(2), x_ddot(0), x_ddot(1), x_ddot(2));
-}
-
-void Body::set_x(float xi = 0, float yi = 0, float phii = 0)
-{
-    x << xi, yi, phii;
-}
-
-void Body::set_x_dot(float x_doti = 0, float y_doti = 0, float phi_doti = 0)
-{
-    x_dot << x_doti, y_doti, phi_doti;
-}
-
-void Body::set_x_ddot(float x_ddoti = 0, float y_ddoti = 0, float phi_ddoti = 0)
-{
-    x_ddot << x_ddoti, y_ddoti, phi_ddoti;
-}
-
-Eigen::Vector3f Body::get_x()
-{
-    return x;
-}
-
-Eigen::Vector3f Body::get_x_dot()
-{
-    return x_dot;
-}
-
-Eigen::Vector3f Body::get_x_ddot()
-{
-    return x_ddot;
+    printf("x:%.3f, y:%.3f, phi:%.3f, vx:%.3f, vy:%.3f, omega:%.3f, ax:%.3f, ay:%.3f, psi:%.3f\n", 
+    I_r_IB(0), I_r_IB(1), I_phi_IB(2), B_v_IB(0), B_v_IB(1), I_omega_IB(2), B_a_IB(0), B_a_IB(1), I_psi_IB(2));
 }
 
 void Body::advance(float dt)
 {
-    q_r = Eigen::AngleAxis<float>(x[2], e_z);
-    x_dot = x_dot + (x_ddot + x_dot[2] * T_VEL * x_dot) * dt;
-    x = x + q_r * x_dot * dt;
+    Xi_IB = Eigen::AngleAxis<float>(I_phi_IB[2], e_z);
+    B_v_IB = B_v_IB + (B_a_IB + B_v_IB.cross(I_omega_IB)) * dt;
+    I_omega_IB = I_omega_IB + I_psi_IB * dt;
+    I_r_IB = I_r_IB + Xi_IB * B_v_IB * dt;
+    I_phi_IB = I_phi_IB + I_omega_IB * dt;
+    
+}
+
+void Body::set_r_phi(float xi = 0, float yi = 0, float phii = 0)
+{
+    I_r_IB << xi, yi, 0.0f;
+    I_phi_IB << 0.0f, 0.0f, phii;
+}
+
+void Body::set_v_omega(float v_xi = 0, float v_yi = 0, float omegai = 0)
+{
+    B_v_IB << v_xi, v_yi, 0.0f;
+    I_omega_IB << 0.0f, 0.0f, omegai;
+}
+
+void Body::set_a_psi(float a_xi = 0, float a_yi = 0, float psii = 0)
+{
+    B_a_IB << a_xi, a_yi, 0.0f;
+    I_psi_IB << 0.0f, 0.0f, psii;
+}
+
+Eigen::Vector3f Body::get_r()
+{
+    return I_r_IB;
+}
+
+Eigen::Vector3f Body::get_phi()
+{
+    return I_phi_IB;
+}
+
+Eigen::Vector3f Body::get_v()
+{
+    return B_v_IB;
+}
+
+Eigen::Vector3f Body::get_omega()
+{
+    return I_omega_IB;
+}
+
+Eigen::Vector3f Body::get_a()
+{
+    return B_a_IB;
+}
+
+Eigen::Vector3f Body::get_psi()
+{
+    return I_psi_IB;
 }

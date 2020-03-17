@@ -1,9 +1,11 @@
+#include <iostream>
 #include <Eigen/Dense>
-#include <boost/tuple/tuple.hpp>
 #include <boost/thread.hpp>
-#include "gnuplot-iostream.h"
 
 #include "Body.h"
+#include "PlotSim.h"
+
+float ddy;
 
 float get_ddy(int &i)
 {
@@ -21,193 +23,125 @@ float get_ddy(int &i)
     return y;
 }
 
-int main()
+void simulation_thread(Body &B)
 {
-    std::vector<std::pair<double, double> > xy_pts;
-//    std::vector<std::pair<double, double> > x_pts;
-//    std::vector<std::pair<double, double> > y_pts;
-    std::vector<std::pair<double, double> > phi_pts;
-    std::vector<std::pair<double, double> > alpha_pts;
-    std::vector<std::pair<double, double> > alphadot_pts;
-    std::vector<std::pair<double, double> > ddphi_pts;
-    std::vector<std::pair<double, double> > xdot_pts;
-    std::vector<std::pair<double, double> > ydot_pts;
-    std::vector<std::pair<double, double> > phidot_pts;
-	std::vector<boost::tuple<double, double, double, double> > heads;
-	std::vector<boost::tuple<double, double, double, double> > ddx_pts;
-	std::vector<boost::tuple<double, double, double, double> > orig_pts;
-    heads.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
-    ddx_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
-    orig_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
+    PlotSim plot;
     
     float alpha;
     float alpha_dot;
     float beta;
+    Eigen::Vector3f beta_dot;
     
 //  Set variables
     float ddphi = 0.0f;
 //    float k_p = 5.0f; //use with alpha
 //    float k_d = 3.0f; //use with alpha
-    float k_p = 1.0f;
-    float k_d = 1.0f;
+    float k_p = 10.0f;
+    float k_d = 15.0f;
     
-//    float ddy = 10.0f;
-//    for (int i = 0; i < 501; i++)
-//    {
-//        ddy[i] = i * 10.0f / 500.0f;
-//    }
-
-    
-    Body B;
-    B.set_x_dot(0,0,0);
-    int temp = 0;
-    B.set_x_ddot(0,get_ddy(temp),0);
-        
-//  Start simulation
+    //  Start simulation
     int sim_steps = 1501;
     float sim_dt = 0.01;
     float sim_time = 0;
     
-    Eigen::Vector3f x_i = B.get_x();
-    Eigen::Vector3f x_dot_i = B.get_x_dot();
-    Eigen::Vector3f x_ddot_i = B.get_x_ddot();
-    Eigen::Vector3f e_x(1,0,0);
+    Eigen::Vector3f I_r_IB;
+    Eigen::Vector3f I_r_IB_perp;
+    Eigen::Vector3f I_phi_IB;
+    Eigen::Vector3f B_v_IB;
+    Eigen::Vector3f I_v_IB;
+    Eigen::Vector3f B_a_IB;
+    Eigen::Vector3f I_omega_IB;
+    Eigen::Vector3f I_a_IB;
+    Eigen::Vector3f B_ex_B(1,0,0); // x-Axis unit vector in frame B
+    Eigen::Vector3f I_ex_B;
+    Eigen::Quaternion<float> Xi_IB; // rotation transformantion from frame B to I
+    Eigen::Quaternion<float> Xi_90z; // 90 degree rotation around z-Axis
+    
+    // constants
     Eigen::Vector3f e_z(0,0,1);
-    Eigen::Vector3f origin_vec; 
-    Eigen::Vector3f v_abs_vec;
-    Eigen::Vector3f heading;
-    Eigen::Vector3f x_ddot_vec;
-    Eigen::Vector3f e_x_T;
-    Eigen::Vector3f beta_dot;
-    Eigen::Quaternion<float> q_r;
-    Eigen::Quaternion<float> q_90;
-    q_r = Eigen::AngleAxis<float>(x_i[2], e_z);
-    q_90 = Eigen::AngleAxis<float>(M_PI/2.0, e_z);
-    Eigen::Matrix3f R_get_xy;
-    R_get_xy << 1,0,0,
-                0,1,0,
-                0,0,0;
-    Eigen::Matrix3f R_get_z;
-    R_get_z << 0,0,0,
-                0,0,0,
-                0,0,1;
-
-    Gnuplot gp;
-    Gnuplot gp_log;
-    gp << "set size ratio -1\n";
+    Xi_90z = Eigen::AngleAxis<float>(M_PI/2.0, e_z);
     
     for (int i = 0; i < sim_steps; i++)
     {
 //        std::cout << sim_time << std::endl;
         
-        x_i = B.get_x();
-        x_dot_i = B.get_x_dot();
-        x_ddot_i = B.get_x_ddot();
-        origin_vec = -1.0 * R_get_xy * x_i;
-        q_r = Eigen::AngleAxis<float>(x_i[2], e_z);
-        x_ddot_vec = q_r * R_get_xy * x_ddot_i;
-        v_abs_vec = q_r * R_get_xy * x_dot_i;
-        heading = q_r * e_x;
-        e_x_T = q_90 * origin_vec * -1.0 / origin_vec.norm();
+        I_r_IB = B.get_r();
+        I_phi_IB = B.get_phi();
+        B_v_IB = B.get_v();
+        I_omega_IB = B.get_omega();
+        B_a_IB = B.get_a();
+        Xi_IB = Eigen::AngleAxis<float>(I_phi_IB[2], e_z);
+        I_a_IB = Xi_IB * B_a_IB;
+        I_v_IB = Xi_IB * B_v_IB;
+        I_ex_B = Xi_IB * B_ex_B;
+        I_r_IB_perp = Xi_90z * I_r_IB / I_r_IB.norm();
+                
+//        std::cout << sim_time << "  " << beta << "  " << beta_dot[2] << std::endl;
+//        std::cout << sim_time << "  " << alpha << "  " << alpha_dot << std::endl;
+//        std::cout << "x" << I_v_IB.norm() << std::endl;
+//        std::cout << "v" << (I_v_IB.dot(e_x_T) * e_x_T).norm() << std::endl;
         
-        alpha = atan2f(heading.cross(v_abs_vec)[2],heading.dot(v_abs_vec));
-//        alpha = atan2f(x_dot_i[1],x_dot_i[0]);
+        // angle between the heading direction and the absolute velocity vector
+        alpha = atan2f(I_ex_B.cross(I_v_IB)[2],I_ex_B.dot(I_v_IB));
         
-        std::cout << sim_time << "  " << beta << "  " << beta_dot[2] << std::endl;
-        std::cout << sim_time << "  " << alpha << "  " << alpha_dot << std::endl;
-//        std::cout << "x" << v_abs_vec.norm() << std::endl;
-//        std::cout << "v" << (v_abs_vec.dot(e_x_T) * e_x_T).norm() << std::endl;
-//        std::cout << sim_time << "  " << aalpha << "  " << v_abs_vec[0] << "  " << v_abs_vec[1] << "  " << x_dot_i[0] << "  " << x_dot_i[1] << std::endl;
-        
-        if (v_abs_vec.norm()==0)
+        if (I_v_IB.norm()==0)
         {
-            alpha_dot = x_dot_i[2];
+            alpha_dot = I_omega_IB[2];
         }
         else 
         {
-            alpha_dot = x_dot_i[2] - get_ddy(i) * cos(alpha) / v_abs_vec.norm();
+            alpha_dot = I_omega_IB[2] - get_ddy(i) * cos(alpha) / I_v_IB.norm();
             // a_z = ddy * cos(alpha); omega = a_z / (sqrtf(pow(x_dot_i[0],2) + pow(x_dot_i[1],2))); 
-            //alpha_dot = x_dot_i[2] - omega;
+            //alpha_dot = I_omega_IB[2] - omega;
         }
         
-        if (origin_vec.norm() == 0 || v_abs_vec.norm() == 0)
+        // angle between the acceleration vector and -I_r_BI
+        if (I_r_IB.norm() == 0 || I_v_IB.norm() == 0)
         {
             beta = 0;
             beta_dot << 0, 0, 0;
-        } else if (x_ddot_vec.norm() == 0)
+        } else if (I_a_IB.norm() == 0)
         {
-            beta = atan2f(heading.cross(origin_vec)[2],heading.dot(origin_vec));;
-            beta_dot = (-1.0 * origin_vec).cross(v_abs_vec.dot(e_x_T) * e_x_T) / powf(origin_vec.norm(),2) - R_get_z * x_dot_i;
+            beta = atan2f(I_ex_B.cross(-I_r_IB)[2],I_ex_B.dot(-I_r_IB));;
+            beta_dot = I_r_IB.cross(I_r_IB_perp.dot(I_v_IB) * I_r_IB_perp) / powf(I_r_IB.norm(),2) - I_omega_IB;
         } else
         {
-            beta = atan2f(x_ddot_vec.cross(origin_vec)[2],x_ddot_vec.dot(origin_vec));
-            beta_dot = (-1.0 * origin_vec).cross(v_abs_vec.dot(e_x_T) * e_x_T) / powf(origin_vec.norm(),2) - R_get_z * x_dot_i;
+            beta = atan2f(I_a_IB.cross(-I_r_IB)[2],I_a_IB.dot(-I_r_IB));
+            
+            // omega_circle = r cross v / (||r||)^2
+            beta_dot = I_r_IB.cross(I_r_IB_perp.dot(I_v_IB) * I_r_IB_perp) / powf(I_r_IB.norm(),2) - I_omega_IB;
         }
         
         
-        ddphi = k_p * alpha - k_d * alpha_dot;
-//        ddphi = k_p * beta + k_d * beta_dot[2];
+//        ddphi = k_p * alpha - k_d * alpha_dot;
+        ddphi = k_p * beta + k_d * beta_dot[2];
 //        ddphi = k_p * (5*alpha + beta) + k_d * (beta_dot[2] - 5*alpha_dot);
-//        float dot = x_i[0]*x_i[1] + 
+        float temp = 0.0f;
+        ddy = get_ddy(i);
+        B.set_a_psi(temp,ddy,ddphi);
         
-        B.set_x_ddot(0,get_ddy(i),ddphi);
-        
-        xy_pts.push_back(std::make_pair(x_i[0], x_i[1]));
-//        x_pts.push_back(std::make_pair(sim_time, x_i[0]));
-//        y_pts.push_back(std::make_pair(sim_time, x_i[1]));
-        phi_pts.push_back(std::make_pair(sim_time, x_i[2]));
-        alpha_pts.push_back(std::make_pair(sim_time, beta));
-        alphadot_pts.push_back(std::make_pair(sim_time, beta_dot[2]));
-        ddphi_pts.push_back(std::make_pair(sim_time, ddphi));
-        xdot_pts.push_back(std::make_pair(sim_time, x_dot_i[0]));
-        ydot_pts.push_back(std::make_pair(sim_time, x_dot_i[1]));
-        phidot_pts.push_back(std::make_pair(sim_time, x_dot_i[2]));
-        
-        heads.pop_back();
-        heads.push_back(boost::make_tuple(x_i[0],x_i[1], cos(x_i[2]), sin(x_i[2])));
-        ddx_pts.pop_back();
-        ddx_pts.push_back(boost::make_tuple(x_i[0],x_i[1], origin_vec[0], origin_vec[1]));
-        orig_pts.pop_back();
-        orig_pts.push_back(boost::make_tuple(x_i[0],x_i[1], (v_abs_vec.dot(e_x_T) * e_x_T)[0], (v_abs_vec.dot(e_x_T) * e_x_T)[1]));
-        if (i%30==0)
-        {
-            heads.push_back(boost::make_tuple(x_i[0],x_i[1], cos(x_i[2]), sin(x_i[2])));
-        }
-        
-        gp << "plot '-' binary" << gp.binFmt1d(xy_pts, "record") << 
-        "with lines title 'xy', '-' with vectors title 'heading', '-' with vectors title 'v_abs_vec', '-' with vectors title 'proj'\n";
-        gp.sendBinary1d(xy_pts);
-        gp.send1d(heads);
-        gp.send1d(ddx_pts);
-        gp.send1d(orig_pts);
-
-        gp.flush();
+        std::cout << sim_time << "  " << beta_dot << std::endl;
         
         B.advance(sim_dt);
         sim_time += sim_dt;
         
+        plot.append_states(i, sim_time, B, alpha, alpha_dot, beta, beta_dot, I_v_IB, I_a_IB);
+        plot.draw_update();
+        
         usleep(sim_dt*1000000);
     }
+    plot.draw_result();
+}
+
+int main()
+{
+    Body B;
+    B.set_v_omega(0,0,0);
+    int temp = 0;
+    ddy = get_ddy(temp);
+    B.set_a_psi(0,ddy,0);
     
-    gp_log << "set multiplot layout 1,2\n";
-    gp_log << "plot '-' with lines title 'alpha', '-' with lines title 'alpha_{dot}', '-' with lines title 'ddphi'\n";
-    gp_log.send1d(alpha_pts);
-    gp_log.send1d(alphadot_pts);
-    gp_log.send1d(ddphi_pts);
-//    gp_log.send1d(phi_pts);
-//    gp_log << "plot '-' with lines title 'alpha_{dot}', '-' with lines title 'omega', '-' with lines title 'phi_dot'\n";
-//    gp_log.send1d(alphadot_pts);
-//    gp_log.send1d(omega_pts);
-//    gp_log.send1d(phidot_pts);
-//    gp_log << "plot '-' with lines title 'x', '-' with lines title 'y', '-' with lines title 'phi'\n";
-//    gp_log.send1d(x_pts);
-//    gp_log.send1d(y_pts);
-//    gp_log.send1d(phi_pts);
-    gp_log << "plot '-' with lines title 'x_dot', '-' with lines title 'y_dot', '-' with lines title 'phi_dot'\n";
-    gp_log.send1d(xdot_pts);
-    gp_log.send1d(ydot_pts);
-    gp_log.send1d(phidot_pts);
-    gp_log << "unset multiplot\n";
+    simulation_thread(B);
     
     return 0;
 }

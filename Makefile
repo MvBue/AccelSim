@@ -177,6 +177,33 @@ src/Main.cpp.s:
 	$(MAKE) -f CMakeFiles/AccelSim.dir/build.make CMakeFiles/AccelSim.dir/src/Main.cpp.s
 .PHONY : src/Main.cpp.s
 
+src/PlotSim.o: src/PlotSim.cpp.o
+
+.PHONY : src/PlotSim.o
+
+# target to build an object file
+src/PlotSim.cpp.o:
+	$(MAKE) -f CMakeFiles/AccelSim.dir/build.make CMakeFiles/AccelSim.dir/src/PlotSim.cpp.o
+.PHONY : src/PlotSim.cpp.o
+
+src/PlotSim.i: src/PlotSim.cpp.i
+
+.PHONY : src/PlotSim.i
+
+# target to preprocess a source file
+src/PlotSim.cpp.i:
+	$(MAKE) -f CMakeFiles/AccelSim.dir/build.make CMakeFiles/AccelSim.dir/src/PlotSim.cpp.i
+.PHONY : src/PlotSim.cpp.i
+
+src/PlotSim.s: src/PlotSim.cpp.s
+
+.PHONY : src/PlotSim.s
+
+# target to generate assembly for a file
+src/PlotSim.cpp.s:
+	$(MAKE) -f CMakeFiles/AccelSim.dir/build.make CMakeFiles/AccelSim.dir/src/PlotSim.cpp.s
+.PHONY : src/PlotSim.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -192,6 +219,9 @@ help:
 	@echo "... src/Main.o"
 	@echo "... src/Main.i"
 	@echo "... src/Main.s"
+	@echo "... src/PlotSim.o"
+	@echo "... src/PlotSim.i"
+	@echo "... src/PlotSim.s"
 .PHONY : help
 
 

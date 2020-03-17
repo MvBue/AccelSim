@@ -21,7 +21,7 @@ set (BOOST_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/Dependencies/boost/include")
 include_directories ("${EIGEN3_INCLUDE_DIR}" "${BOOST_INCLUDE_DIR}")
 
 #look for package and required components
-find_package(Boost 1.72.0 REQUIRED COMPONENTS iostreams system filesystem)
+find_package(Boost 1.72.0 REQUIRED COMPONENTS iostreams filesystem)
 
 #tell cmake to compile all .cpp files found in source_dir
 file (GLOB source_files "${source_dir}/*.cpp")
