@@ -6,9 +6,19 @@
 
 #IncludeRegexTransform: 
 
+/home/michi/Dev/AccelSim/src/Body.cpp
+Body.h
+/home/michi/Dev/AccelSim/src/Body.h
+
 /home/michi/Dev/AccelSim/src/Body.h
 Eigen/Dense
 -
+
+/home/michi/Dev/AccelSim/src/DataLogger.h
+Eigen/Dense
+-
+Body.h
+/home/michi/Dev/AccelSim/src/Body.h
 
 /home/michi/Dev/AccelSim/src/Main.cpp
 iostream
@@ -21,6 +31,8 @@ Body.h
 /home/michi/Dev/AccelSim/src/Body.h
 PlotSim.h
 /home/michi/Dev/AccelSim/src/PlotSim.h
+DataLogger.h
+/home/michi/Dev/AccelSim/src/DataLogger.h
 
 /home/michi/Dev/AccelSim/src/PlotSim.h
 Body.h
@@ -31,6 +43,8 @@ gnuplot-iostream.h
 /home/michi/Dev/AccelSim/src/gnuplot-iostream.h
 Eigen/Dense
 -
+DataLogger.h
+/home/michi/Dev/AccelSim/src/DataLogger.h
 
 /home/michi/Dev/AccelSim/src/gnuplot-iostream.h
 cstdio

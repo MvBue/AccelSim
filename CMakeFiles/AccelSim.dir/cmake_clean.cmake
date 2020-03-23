@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "AccelSim"
   "AccelSim.pdb"
   "CMakeFiles/AccelSim.dir/src/Body.cpp.o"
+  "CMakeFiles/AccelSim.dir/src/DataLogger.cpp.o"
   "CMakeFiles/AccelSim.dir/src/Main.cpp.o"
   "CMakeFiles/AccelSim.dir/src/PlotSim.cpp.o"
 )

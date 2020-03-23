@@ -3,6 +3,7 @@
 	<VirtualDirectory Name="src">
 		<VirtualDirectory Name="src">
 			<File Name="src/Body.cpp"/>
+			<File Name="src/DataLogger.cpp"/>
 			<File Name="src/Main.cpp"/>
 			<File Name="src/PlotSim.cpp"/>
 		</VirtualDirectory>
@@ -10,6 +11,7 @@
 	<VirtualDirectory Name="include">
 		<VirtualDirectory Name="src">
 			<File Name="src/Body.h"/>
+			<File Name="src/DataLogger.h"/>
 			<File Name="src/PlotSim.h"/>
 		</VirtualDirectory>
 	</VirtualDirectory>

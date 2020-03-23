@@ -1,6 +1,5 @@
 #include "Body.h"
 
-
 Body::Body()
 {
     I_r_IB << 0.0f, 0.0f, 0.0f;
@@ -9,9 +8,13 @@ Body::Body()
     I_omega_IB << 0.0f, 0.0f, 0.0f;
     B_a_IB << 0.0f, 0.0f, 0.0f;
     I_psi_IB << 0.0f, 0.0f, 0.0f;
+    
+    update_state_vars();
 
     //Declare constants
-    e_z << 0.0f, 0.0f, 1.0f;
+    B_ex_B = Eigen::Vector3f::UnitX();
+    
+    state.conservativeResize(13, 1);
 }
 
 Body::Body(float xi = 0.0f, float yi = 0.0f, float phii = 0.0f, float v_xi = 0.0f, float v_yi = 0.0f, 
@@ -23,6 +26,13 @@ Body::Body(float xi = 0.0f, float yi = 0.0f, float phii = 0.0f, float v_xi = 0.0
     I_omega_IB << 0.0f, 0.0f, omegai;
     B_a_IB << a_xi, a_yi, 0.0f;
     I_psi_IB << 0.0f, 0.0f, psii;
+    
+    update_state_vars();
+    
+    //Declare constants
+    B_ex_B = Eigen::Vector3f::UnitX();
+    
+    state.conservativeResize(13, 1);
 };
 
 void Body::display() 
@@ -33,11 +43,53 @@ void Body::display()
 
 void Body::advance(float dt)
 {
-    Xi_IB = Eigen::AngleAxis<float>(I_phi_IB[2], e_z);
+    Xi_IB = Eigen::AngleAxis<float>(I_phi_IB[2], Eigen::Vector3f::UnitZ());
     B_v_IB = B_v_IB + (B_a_IB + B_v_IB.cross(I_omega_IB)) * dt;
     I_omega_IB = I_omega_IB + I_psi_IB * dt;
     I_r_IB = I_r_IB + Xi_IB * B_v_IB * dt;
     I_phi_IB = I_phi_IB + I_omega_IB * dt;
+    update_state_vars();
+}
+
+void Body::update_state_vars()
+{
+    I_ex_B = Xi_IB * B_ex_B;
+    I_v_IB = Xi_IB * B_v_IB;
+    I_a_IB = Xi_IB * B_a_IB;
+    
+    alpha = atan2f (I_v_IB.cross(I_ex_B)[2],I_v_IB.dot(I_ex_B));
+    
+    if (I_v_IB.norm()==0)
+        {
+            alpha_dot = I_omega_IB;
+        }
+        else 
+        {
+            rho_instant = (I_a_IB - (I_v_IB.dot(I_a_IB) * I_v_IB / powf(I_v_IB.norm(),2))).norm() / I_v_IB.norm() * Eigen::Vector3f::UnitZ();
+            alpha_dot = I_omega_IB - rho_instant;
+        }
+
+    if (I_r_IB.norm() == 0 || I_v_IB.norm() == 0)
+        {
+            beta = 0.0f;
+        } else if (I_a_IB.norm() == 0)
+        {
+            beta = atan2f(-I_r_IB.cross(I_ex_B)[2],-I_r_IB.dot(I_ex_B));
+        } else
+        {
+            beta = atan2f(-I_r_IB.cross(I_a_IB)[2],-I_r_IB.dot(I_a_IB));
+        }
+
+    if (I_r_IB.norm() == 0 || I_v_IB.norm() == 0)
+        {
+            beta_dot = Eigen::Vector3f::Zero();
+        } else
+        {
+            // I_r_IB.cross(I_v_IB) = ||I_v_IB|| * ||I_r_IB|| * sin(angle_between_v_and_r)
+            // AND rho_origin = ||I_v_IB|| * sin(angle_between_v_and_r) / ||I_r_IB||
+            rho_origin = I_r_IB.cross(I_v_IB) / powf(I_r_IB.norm(),2);
+            beta_dot = I_omega_IB - rho_origin;
+        }
     
 }
 
@@ -57,6 +109,14 @@ void Body::set_a_psi(float a_xi = 0, float a_yi = 0, float psii = 0)
 {
     B_a_IB << a_xi, a_yi, 0.0f;
     I_psi_IB << 0.0f, 0.0f, psii;
+}
+
+Eigen::VectorXf Body::get_state()
+{
+    state << I_r_IB[0], I_r_IB[1], I_phi_IB[2], B_v_IB[0], B_v_IB[1], I_omega_IB[2], B_a_IB[0], B_a_IB[1], I_psi_IB[2], 
+    alpha, alpha_dot[2], beta, beta_dot[2];
+    
+    return state;
 }
 
 Eigen::Vector3f Body::get_r()
@@ -87,4 +147,24 @@ Eigen::Vector3f Body::get_a()
 Eigen::Vector3f Body::get_psi()
 {
     return I_psi_IB;
+}
+
+float Body::get_alpha()
+{
+    return alpha;
+}
+
+Eigen::Vector3f Body::get_alpha_dot()
+{
+    return alpha_dot;
+}
+
+float Body::get_beta()
+{
+    return beta;
+}
+
+Eigen::Vector3f Body::get_beta_dot()
+{
+    return beta_dot;
 }

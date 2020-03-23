@@ -150,6 +150,33 @@ src/Body.cpp.s:
 	$(MAKE) -f CMakeFiles/AccelSim.dir/build.make CMakeFiles/AccelSim.dir/src/Body.cpp.s
 .PHONY : src/Body.cpp.s
 
+src/DataLogger.o: src/DataLogger.cpp.o
+
+.PHONY : src/DataLogger.o
+
+# target to build an object file
+src/DataLogger.cpp.o:
+	$(MAKE) -f CMakeFiles/AccelSim.dir/build.make CMakeFiles/AccelSim.dir/src/DataLogger.cpp.o
+.PHONY : src/DataLogger.cpp.o
+
+src/DataLogger.i: src/DataLogger.cpp.i
+
+.PHONY : src/DataLogger.i
+
+# target to preprocess a source file
+src/DataLogger.cpp.i:
+	$(MAKE) -f CMakeFiles/AccelSim.dir/build.make CMakeFiles/AccelSim.dir/src/DataLogger.cpp.i
+.PHONY : src/DataLogger.cpp.i
+
+src/DataLogger.s: src/DataLogger.cpp.s
+
+.PHONY : src/DataLogger.s
+
+# target to generate assembly for a file
+src/DataLogger.cpp.s:
+	$(MAKE) -f CMakeFiles/AccelSim.dir/build.make CMakeFiles/AccelSim.dir/src/DataLogger.cpp.s
+.PHONY : src/DataLogger.cpp.s
+
 src/Main.o: src/Main.cpp.o
 
 .PHONY : src/Main.o
@@ -216,6 +243,9 @@ help:
 	@echo "... src/Body.o"
 	@echo "... src/Body.i"
 	@echo "... src/Body.s"
+	@echo "... src/DataLogger.o"
+	@echo "... src/DataLogger.i"
+	@echo "... src/DataLogger.s"
 	@echo "... src/Main.o"
 	@echo "... src/Main.i"
 	@echo "... src/Main.s"
