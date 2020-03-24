@@ -4,6 +4,7 @@
 #include "gnuplot-iostream.h"
 #include <Eigen/Dense>
 #include "DataLogger.h"
+#include "Simulation.h"
 
 
 class PlotSim
@@ -36,6 +37,6 @@ private:
         
 public:
     PlotSim();
-    void draw_update(DataLogger& logger, Body& B, float& sim_time, bool &sim_done);
+    void draw_update(Body& B, Simulation &sim);
     void draw_result(DataLogger& logger);
 };

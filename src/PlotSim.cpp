@@ -1,5 +1,4 @@
 #include "PlotSim.h"
-#include "Body.h"
 
 PlotSim::PlotSim()
 {
@@ -11,12 +10,11 @@ PlotSim::PlotSim()
     state.conservativeResize(14, 1);
 }
 
-void PlotSim::draw_update(DataLogger &logger, Body &B, float &sim_time, bool &sim_done)
+void PlotSim::draw_update(Body &B, Simulation &sim)
 {
-    while (!sim_done)
+    while (!sim.get_sim_done())
     {
-//        state = logger.get_latest_state();
-        state << sim_time,B.get_state();
+        state << sim.get_sim_time(), B.get_state();
                 
         xy_pts.push_back(std::make_pair(state[1], state[2]));
         heads.pop_back();
@@ -65,8 +63,6 @@ void PlotSim::draw_result(DataLogger& logger)
         phidot_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[6]));
     }
     
-//    gp_log << "set terminal wxt\n";
-//    gp_log << "set terminal wxt size 900,300 persist\n";
     gp_log << "set multiplot layout 1,3\n";
     gp_log << "plot '-' with lines title 'beta', '-' with lines title 'beta_{dot}'\n";
     gp_log.send1d(beta_pts);

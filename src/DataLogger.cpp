@@ -5,21 +5,15 @@ DataLogger::DataLogger()
     states.conservativeResize(14, 1);
 }
 
-void DataLogger::append_state(float &sim_time, Body &B, bool &sim_done)
+void DataLogger::append_state(Body &B, Simulation &sim)
 {
-    while (!sim_done)
+    while (!sim.get_sim_done())
     {
         state = B.get_state();
         states.conservativeResize(states.rows(), states.cols() + 1);
-        states.col(states.cols() - 1) << sim_time, state;
+        states.col(states.cols() - 1) << sim.get_sim_time(), state;
     }
 }
-
-//Eigen::VectorXf DataLogger::get_latest_state()
-//{
-//    output = states.rightCols(1);
-//    return output;
-//}
 
 Eigen::MatrixXf DataLogger::get_states()
 {

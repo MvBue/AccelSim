@@ -2,6 +2,7 @@
 #include <Eigen/Dense>
 #include "Body.h"
 #include <boost/thread.hpp>
+#include "Simulation.h"
 
 class DataLogger 
 {
@@ -12,7 +13,6 @@ private:
 
 public:
     DataLogger();
-    void append_state(float &sim_time, Body &B, bool &sim_done);
-//    Eigen::VectorXf get_latest_state();
+    void append_state(Body &B, Simulation &sim);
     Eigen::MatrixXf get_states();
 };
