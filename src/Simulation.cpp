@@ -7,10 +7,11 @@ Simulation::Simulation()
     
     // Controller parameters
     k_p = 1.0f;
-    k_d = 1.0f;
+    k_d = 2.0f;
     
     //  Simulation parameters
-    sim_steps = 1501;
+    sim_steps = 600
+    ;
     sim_dt = 0.01;
     sim_time = 0.0f;
     sim_done = false;
@@ -36,13 +37,17 @@ float Simulation::controller(Body &B)
 {
         alpha = B.get_alpha();
         alpha_dot = B.get_alpha_dot();
-//        ddphi = -k_p * alpha - k_d * alpha_dot[2];
+//        return -k_p * alpha - k_d * alpha_dot[2];
         
         beta = B.get_beta();
         beta_dot = B.get_beta_dot();
-//        ddphi = -k_p * beta - k_d * beta_dot[2];
+//        return -k_p * beta - k_d * beta_dot[2];
+
+        gamma = B.get_gamma();
+        gamma_dot = B.get_gamma_dot();
+        return -k_p * gamma - k_d * gamma_dot[2];
         
-        return -k_p * (5*alpha + beta) - k_d * (beta_dot[2] + 5*alpha_dot[2]);
+//        return -k_p * (5*alpha + beta) - k_d * (beta_dot[2] + 5*alpha_dot[2]);
 }
 
 void Simulation::simulation_thread(Body &B)

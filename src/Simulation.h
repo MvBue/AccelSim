@@ -13,6 +13,9 @@ private:
     float beta; // angle between the acceleration vector and -I_r_BI
     Eigen::Vector3f beta_dot;
     
+    float gamma; // angle between the acceleration vector and -I_v_BI
+    Eigen::Vector3f gamma_dot;
+    
     float ddphi;
     // Controller parameters
     float k_p;

@@ -2,7 +2,7 @@
 
 DataLogger::DataLogger()
 {
-    states.conservativeResize(14, 1);
+    states.conservativeResize(16, 1);
 }
 
 void DataLogger::append_state(Body &B, Simulation &sim)

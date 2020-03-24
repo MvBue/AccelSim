@@ -27,7 +27,11 @@ private:
     float alpha; // angle between the heading direction and the absolute velocity vector
     Eigen::Vector3f alpha_dot; // derivative of alpha
     float beta; // angle between the acceleration vector and -I_r_BI
+    //TODO: include derivative of acceleration vector into beta_dot
     Eigen::Vector3f beta_dot; // derivative of beta
+    float gamma; // angle between the acceleration vector and -I_v_BI
+    //TODO: include derivative of acceleration vector into gamma_dot
+    Eigen::Vector3f gamma_dot; // derivative of gamma
     
     Eigen::Vector3f B_ex_B; // x-Axis unit vector in frame B
     Eigen::Vector3f I_ex_B;
@@ -60,6 +64,8 @@ public:
     Eigen::Vector3f get_alpha_dot();
     float get_beta();
     Eigen::Vector3f get_beta_dot();
+    float get_gamma();
+    Eigen::Vector3f get_gamma_dot();
     void set_state();
     Eigen::VectorXf get_state();
     void update_state_vars();

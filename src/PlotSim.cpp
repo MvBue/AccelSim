@@ -7,7 +7,7 @@ PlotSim::PlotSim()
     v_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
     a_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
     orig_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
-    state.conservativeResize(14, 1);
+    state.conservativeResize(16, 1);
 }
 
 void PlotSim::draw_update(Body &B, Simulation &sim)
@@ -24,7 +24,7 @@ void PlotSim::draw_update(Body &B, Simulation &sim)
         v_pts.pop_back();
         v_pts.push_back(boost::make_tuple(state[1], state[2], state[4] * cos(state[3]) - state[5] * sin(state[3]), state[4] * sin(state[3]) + state[5] * cos(state[3])));
         a_pts.pop_back();
-        a_pts.push_back(boost::make_tuple(state[1], state[2], state[7] * cos(state[3]) - state[8] * sin(state[3]), state[7] * sin(state[3]) + state[8] * cos(state[3])));
+        a_pts.push_back(boost::make_tuple(state[1], state[2], state[7] /10.0f * cos(state[3]) - state[8] /10.0f * sin(state[3]), state[7] / 10.0f * sin(state[3]) + state[8] /10.0f * cos(state[3])));
         
         if (state[0] > freeze_time)
         {
@@ -57,6 +57,8 @@ void PlotSim::draw_result(DataLogger& logger)
         alphadot_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[11]));
         beta_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[12]));
         betadot_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[13]));
+        gamma_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[14]));
+        gammadot_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[15]));
         ddphi_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[9]));
         xdot_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[4]));
         ydot_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[5]));
@@ -68,11 +70,13 @@ void PlotSim::draw_result(DataLogger& logger)
     gp_log.send1d(beta_pts);
     gp_log.send1d(betadot_pts);
     
-    gp_log << "plot '-' with lines title 'alpha', '-' with lines title 'alpha_{dot}'\n";
+    gp_log << "plot '-' with lines title 'alpha', '-' with lines title 'alpha_{dot}', '-' with lines title 'gamma', '-' with lines title 'gamma_{dot}'\n";
     gp_log.send1d(alpha_pts);
     gp_log.send1d(alphadot_pts);
+    gp_log.send1d(gamma_pts);
+    gp_log.send1d(gammadot_pts);
 
-    gp_log << "plot '-' with lines title 'x_dot', '-' with lines title 'y_dot', '-' with lines title 'phi_dot'\n";
+    gp_log << "plot '-' with lines title 'x_{dot}', '-' with lines title 'y_{dot}', '-' with lines title 'phi_{dot}'\n";
     gp_log.send1d(xdot_pts);
     gp_log.send1d(ydot_pts);
     gp_log.send1d(phidot_pts);

@@ -24,6 +24,8 @@ private:
     std::vector<std::pair<double, double> > alphadot_pts;
     std::vector<std::pair<double, double> > beta_pts;
     std::vector<std::pair<double, double> > betadot_pts;
+    std::vector<std::pair<double, double> > gamma_pts;
+    std::vector<std::pair<double, double> > gammadot_pts;
     std::vector<std::pair<double, double> > ddphi_pts;
     std::vector<std::pair<double, double> > xdot_pts;
     std::vector<std::pair<double, double> > ydot_pts;

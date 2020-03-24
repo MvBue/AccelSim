@@ -12,7 +12,7 @@ Body::Body()
     //Declare constants
     B_ex_B = Eigen::Vector3f::UnitX();
     
-    state.conservativeResize(13, 1);
+    state.conservativeResize(15, 1);
     new_state = false;
     update_state_vars();
     set_state();
@@ -31,7 +31,7 @@ Body::Body(float xi = 0.0f, float yi = 0.0f, float phii = 0.0f, float v_xi = 0.0
     //Declare constants
     B_ex_B = Eigen::Vector3f::UnitX();
     
-    state.conservativeResize(13, 1);
+    state.conservativeResize(15, 1);
     new_state = false;
     update_state_vars();
     set_state();
@@ -95,6 +95,24 @@ void Body::update_state_vars()
             rho_origin = I_r_IB.cross(I_v_IB) / powf(I_r_IB.norm(),2);
             beta_dot = I_omega_IB - rho_origin;
         }
+        
+    if (I_a_IB.norm() == 0 || I_v_IB.norm() == 0)
+        {
+            gamma = 0.0f;
+        } else
+        {
+            gamma = atan2f(-I_v_IB.cross(I_a_IB)[2],-I_v_IB.dot(I_a_IB));
+        }
+        
+    if (I_a_IB.norm() == 0 || I_v_IB.norm() == 0)
+        {
+            gamma_dot = Eigen::Vector3f::Zero();
+        } else
+        {
+            //rho_instant = || I_a_IB_perpToV || / || I_v_IB // * I_e_z
+            rho_instant = (I_a_IB - (I_v_IB.dot(I_a_IB) * I_v_IB / powf(I_v_IB.norm(),2))).norm() / I_v_IB.norm() * Eigen::Vector3f::UnitZ();
+            gamma_dot = I_omega_IB - rho_instant;
+        }
 }
 
 void Body::set_r_phi(float xi = 0, float yi = 0, float phii = 0)
@@ -119,7 +137,7 @@ void Body::set_state()
 {
     boost::unique_lock<boost::mutex> lock{mutex};
     state << I_r_IB[0], I_r_IB[1], I_phi_IB[2], B_v_IB[0], B_v_IB[1], I_omega_IB[2], B_a_IB[0], B_a_IB[1], I_psi_IB[2], 
-    alpha, alpha_dot[2], beta, beta_dot[2];
+    alpha, alpha_dot[2], beta, beta_dot[2], gamma, gamma_dot[2];
     cond.notify_all();
 }
 
@@ -179,4 +197,14 @@ float Body::get_beta()
 Eigen::Vector3f Body::get_beta_dot()
 {
     return beta_dot;
+}
+
+float Body::get_gamma()
+{
+    return gamma;
+}
+
+Eigen::Vector3f Body::get_gamma_dot()
+{
+    return gamma_dot;
 }
