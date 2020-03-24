@@ -9,12 +9,13 @@ Body::Body()
     B_a_IB << 0.0f, 0.0f, 0.0f;
     I_psi_IB << 0.0f, 0.0f, 0.0f;
     
-    update_state_vars();
-
     //Declare constants
     B_ex_B = Eigen::Vector3f::UnitX();
     
     state.conservativeResize(13, 1);
+    new_state = false;
+    update_state_vars();
+    set_state();
 }
 
 Body::Body(float xi = 0.0f, float yi = 0.0f, float phii = 0.0f, float v_xi = 0.0f, float v_yi = 0.0f, 
@@ -27,12 +28,13 @@ Body::Body(float xi = 0.0f, float yi = 0.0f, float phii = 0.0f, float v_xi = 0.0
     B_a_IB << a_xi, a_yi, 0.0f;
     I_psi_IB << 0.0f, 0.0f, psii;
     
-    update_state_vars();
-    
     //Declare constants
     B_ex_B = Eigen::Vector3f::UnitX();
     
     state.conservativeResize(13, 1);
+    new_state = false;
+    update_state_vars();
+    set_state();
 };
 
 void Body::display() 
@@ -43,12 +45,15 @@ void Body::display()
 
 void Body::advance(float dt)
 {
+    
     Xi_IB = Eigen::AngleAxis<float>(I_phi_IB[2], Eigen::Vector3f::UnitZ());
     B_v_IB = B_v_IB + (B_a_IB + B_v_IB.cross(I_omega_IB)) * dt;
     I_omega_IB = I_omega_IB + I_psi_IB * dt;
     I_r_IB = I_r_IB + Xi_IB * B_v_IB * dt;
     I_phi_IB = I_phi_IB + I_omega_IB * dt;
     update_state_vars();
+    
+    set_state();
 }
 
 void Body::update_state_vars()
@@ -90,7 +95,6 @@ void Body::update_state_vars()
             rho_origin = I_r_IB.cross(I_v_IB) / powf(I_r_IB.norm(),2);
             beta_dot = I_omega_IB - rho_origin;
         }
-    
 }
 
 void Body::set_r_phi(float xi = 0, float yi = 0, float phii = 0)
@@ -111,12 +115,20 @@ void Body::set_a_psi(float a_xi = 0, float a_yi = 0, float psii = 0)
     I_psi_IB << 0.0f, 0.0f, psii;
 }
 
-Eigen::VectorXf Body::get_state()
+void Body::set_state()
 {
+    boost::unique_lock<boost::mutex> lock{mutex};
     state << I_r_IB[0], I_r_IB[1], I_phi_IB[2], B_v_IB[0], B_v_IB[1], I_omega_IB[2], B_a_IB[0], B_a_IB[1], I_psi_IB[2], 
     alpha, alpha_dot[2], beta, beta_dot[2];
-    
-    return state;
+    cond.notify_all();
+}
+
+Eigen::VectorXf Body::get_state()
+{
+    boost::unique_lock<boost::mutex> lock{mutex};
+    cond.wait(lock);
+    output = state;
+    return output;
 }
 
 Eigen::Vector3f Body::get_r()

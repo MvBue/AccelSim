@@ -1,4 +1,5 @@
 #include "PlotSim.h"
+#include "Body.h"
 
 PlotSim::PlotSim()
 {
@@ -7,43 +8,48 @@ PlotSim::PlotSim()
     v_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
     a_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
     orig_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
+    state.conservativeResize(14, 1);
 }
 
-void PlotSim::draw_update(DataLogger &logger)
+void PlotSim::draw_update(DataLogger &logger, Body &B, float &sim_time, bool &sim_done)
 {
-    state = logger.get_latest_state();
-    
-    xy_pts.push_back(std::make_pair(state[1], state[2]));
-    heads.pop_back();
-    heads.push_back(boost::make_tuple(state[1],state[2], cos(state[3]), sin(state[3])));
-    orig_pts.pop_back();
-    orig_pts.push_back(boost::make_tuple(0.0f, 0.0f, state[1], state[2]));
-    v_pts.pop_back();
-    v_pts.push_back(boost::make_tuple(state[1], state[2], state[4] * cos(state[3]) - state[5] * sin(state[3]), state[4] * sin(state[3]) + state[5] * cos(state[3])));
-    a_pts.pop_back();
-    a_pts.push_back(boost::make_tuple(state[1], state[2], state[7] * cos(state[3]) - state[8] * sin(state[3]), state[7] * sin(state[3]) + state[8] * cos(state[3])));
-    
-    if (state[0] > freeze_time)
+    while (!sim_done)
     {
+//        state = logger.get_latest_state();
+        state << sim_time,B.get_state();
+                
+        xy_pts.push_back(std::make_pair(state[1], state[2]));
+        heads.pop_back();
         heads.push_back(boost::make_tuple(state[1],state[2], cos(state[3]), sin(state[3])));
-        freeze_time += 1.0f;
-    }
-    
-    gp << "plot '-' binary" << gp.binFmt1d(xy_pts, "record") << 
-    "with lines title 'path', '-' with vectors title 'heading', '-' with vectors title 'I r IB', '-' with vectors title 'I v IB', '-' with vectors title 'I a IB'\n";
-    gp.sendBinary1d(xy_pts);
-    gp.send1d(heads);
-    gp.send1d(orig_pts);
-    gp.send1d(v_pts);
-    gp.send1d(a_pts);
+        orig_pts.pop_back();
+        orig_pts.push_back(boost::make_tuple(0.0f, 0.0f, state[1], state[2]));
+        v_pts.pop_back();
+        v_pts.push_back(boost::make_tuple(state[1], state[2], state[4] * cos(state[3]) - state[5] * sin(state[3]), state[4] * sin(state[3]) + state[5] * cos(state[3])));
+        a_pts.pop_back();
+        a_pts.push_back(boost::make_tuple(state[1], state[2], state[7] * cos(state[3]) - state[8] * sin(state[3]), state[7] * sin(state[3]) + state[8] * cos(state[3])));
+        
+        if (state[0] > freeze_time)
+        {
+            heads.push_back(boost::make_tuple(state[1],state[2], cos(state[3]), sin(state[3])));
+            freeze_time += 1.0f;
+        }
+        
+        gp << "plot '-' binary" << gp.binFmt1d(xy_pts, "record") << 
+        "with lines title 'path', '-' with vectors title 'heading', '-' with vectors title 'I r IB', '-' with vectors title 'I v IB', '-' with vectors title 'I a IB'\n";
+        gp.sendBinary1d(xy_pts);
+        gp.send1d(heads);
+        gp.send1d(orig_pts);
+        gp.send1d(v_pts);
+        gp.send1d(a_pts);
 
-    gp.flush();
+        gp.flush();
+    }
 }
 
-void PlotSim::draw_result(DataLogger &logger)
+void PlotSim::draw_result(DataLogger& logger)
 {
     states = logger.get_states();
-    
+        
     for (int col = 0; col < states.cols(); col++)
     {
 //        x_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[1]));
@@ -59,6 +65,8 @@ void PlotSim::draw_result(DataLogger &logger)
         phidot_pts.push_back(std::make_pair(states.col(col)[0], states.col(col)[6]));
     }
     
+//    gp_log << "set terminal wxt\n";
+//    gp_log << "set terminal wxt size 900,300 persist\n";
     gp_log << "set multiplot layout 1,3\n";
     gp_log << "plot '-' with lines title 'beta', '-' with lines title 'beta_{dot}'\n";
     gp_log.send1d(beta_pts);
@@ -73,4 +81,5 @@ void PlotSim::draw_result(DataLogger &logger)
     gp_log.send1d(ydot_pts);
     gp_log.send1d(phidot_pts);
     gp_log << "unset multiplot\n";
+    
 }

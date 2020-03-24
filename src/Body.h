@@ -7,7 +7,7 @@
 
 #pragma once
 #include <Eigen/Dense>
-
+#include <boost/thread.hpp>
 
 class Body
 {
@@ -35,6 +35,11 @@ private:
     Eigen::Quaternion<float> Xi_IB;
     
     Eigen::VectorXf state;
+    Eigen::VectorXf output;
+    
+    boost::mutex mutex;
+    boost::condition_variable_any cond;
+    bool new_state;
     
 public:
     Body();
@@ -55,6 +60,7 @@ public:
     Eigen::Vector3f get_alpha_dot();
     float get_beta();
     Eigen::Vector3f get_beta_dot();
+    void set_state();
     Eigen::VectorXf get_state();
     void update_state_vars();
 };

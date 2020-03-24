@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.16.5)
 project (AccelSim)
 
 #set flags for cmake (to show errors and which cpp version should be used)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -std=c++14")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -std=c++14 -pthread")
 
 #define projects source directory
 set (source_dir "${PROJECT_SOURCE_DIR}/src/")
@@ -21,7 +21,7 @@ set (BOOST_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/Dependencies/boost/include")
 include_directories ("${EIGEN3_INCLUDE_DIR}" "${BOOST_INCLUDE_DIR}")
 
 #look for package and required components
-find_package(Boost 1.72.0 REQUIRED COMPONENTS iostreams filesystem)
+find_package(Boost 1.72.0 REQUIRED COMPONENTS iostreams filesystem thread)
 
 #tell cmake to compile all .cpp files found in source_dir
 file (GLOB source_files "${source_dir}/*.cpp")
@@ -30,6 +30,6 @@ file (GLOB source_files "${source_dir}/*.cpp")
 add_executable (AccelSim ${source_files})
 
 #add libraries to be linked (without "lib" at beginning and ".so" at end of filename)
-target_link_libraries(AccelSim boost_iostreams boost_system boost_filesystem util)
+target_link_libraries(AccelSim boost_iostreams boost_system boost_filesystem boost_thread util)
 
 

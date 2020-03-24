@@ -36,6 +36,6 @@ private:
         
 public:
     PlotSim();
-    void draw_update(DataLogger &logger);
-    void draw_result(DataLogger &logger);
+    void draw_update(DataLogger& logger, Body& B, float& sim_time, bool &sim_done);
+    void draw_result(DataLogger& logger);
 };

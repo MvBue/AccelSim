@@ -6,12 +6,10 @@
 
 #IncludeRegexTransform: 
 
-/home/michi/Dev/AccelSim/src/Body.cpp
-Body.h
-/home/michi/Dev/AccelSim/src/Body.h
-
 /home/michi/Dev/AccelSim/src/Body.h
 Eigen/Dense
+-
+boost/thread.hpp
 -
 
 /home/michi/Dev/AccelSim/src/DataLogger.h
@@ -19,6 +17,8 @@ Eigen/Dense
 -
 Body.h
 /home/michi/Dev/AccelSim/src/Body.h
+boost/thread.hpp
+-
 
 /home/michi/Dev/AccelSim/src/Main.cpp
 iostream
@@ -26,6 +26,8 @@ iostream
 Eigen/Dense
 -
 boost/thread.hpp
+-
+atomic
 -
 Body.h
 /home/michi/Dev/AccelSim/src/Body.h

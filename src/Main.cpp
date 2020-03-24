@@ -1,12 +1,18 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <boost/thread.hpp>
+#include <atomic>
 
 #include "Body.h"
 #include "PlotSim.h"
 #include "DataLogger.h"
 
+Body B;
+DataLogger logger;
+PlotSim plot;
 float target_acceleration;
+float sim_time = 0.0f;
+bool sim_done = false;
 
 float get_target_acceleration(int &i)
 {
@@ -24,11 +30,10 @@ float get_target_acceleration(int &i)
     return y;
 }
 
-void simulation_thread(Body &B)
+void simulation_thread()
 {
     // Initialize variables
-    PlotSim plot;
-    DataLogger logger;
+    
     
     float alpha; // angle between the heading direction and the absolute velocity vector
     Eigen::Vector3f alpha_dot;
@@ -44,7 +49,6 @@ void simulation_thread(Body &B)
     //  Simulation parameters
     int sim_steps = 1501;
     float sim_dt = 0.01;
-    float sim_time = 0;
     
     for (int i = 0; i < sim_steps; i++)
     {
@@ -65,27 +69,29 @@ void simulation_thread(Body &B)
         B.set_a_psi(0.0f,target_acceleration,ddphi);
         
         // Advance simulation
+        std::cout << "simtime " << sim_time << std::endl;
+        if (i == sim_steps - 1)
+        {
+            sim_done = true;
+        }
+        
         B.advance(sim_dt);
-        sim_time += sim_dt;
-        
-        // Log State
-        logger.append_state(sim_time, B);
-        
-        // Draw live plot
-        plot.draw_update(logger);
-        
-        std::cout << "sim_time: " << sim_time << std::endl;
         
         usleep(sim_dt*1000000);
+        sim_time += sim_dt;
     }
     plot.draw_result(logger);
 }
 
 int main()
 {
-    Body B;
-
-    simulation_thread(B);
+    boost::thread draw_thread(&PlotSim::draw_update, &plot, boost::ref(logger), boost::ref(B), boost::ref(sim_time), boost::ref(sim_done));
+    boost::thread log_thread(&DataLogger::append_state, &logger, boost::ref(sim_time), boost::ref(B), boost::ref(sim_done));
+    boost::thread sim_thread(simulation_thread);
+    
+    sim_thread.join();
+    draw_thread.join();
+    log_thread.join();
     
     return 0;
 }
