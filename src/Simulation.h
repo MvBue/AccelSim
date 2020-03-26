@@ -1,8 +1,10 @@
 #pragma once
+#include <iostream>
 #include <Eigen/Dense>
 #include <boost/tuple/tuple.hpp>
 
 #include "Body.h"
+#include "CSVReader.h"
 
 class Simulation
 {
@@ -22,18 +24,25 @@ private:
     float k_d;
     
     //  Simulation parameters
-    int sim_steps;
+    float sim_duration;
     float sim_dt;
     float sim_time;
     bool sim_done;
     
     float target_acceleration;
     
+    CSVReader file_reader;
+    std::vector<std::pair<std::string, std::vector<float>>> data;
+    std::vector<float> time;
+    std::vector<float> ay;
+    int t_size;
+    float ay_m;
+    
 public:
-    Simulation();
+    Simulation(std::string &filename);
     void simulation_thread(Body &B);
     float controller(Body &B);
-    float get_target_acceleration(int &i);
+    float get_target_acceleration(float &t);
     float get_sim_time();
     float get_sim_done();
 };

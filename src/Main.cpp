@@ -12,7 +12,9 @@ int main()
     Body B;
     DataLogger logger;
     PlotSim plot;
-    Simulation sim;
+
+    std::string filename = "logdata.csv";
+    Simulation sim(filename);
 
     boost::thread draw_thread(&PlotSim::draw_update, &plot, boost::ref(B), boost::ref(sim));
     boost::thread log_thread(&DataLogger::append_state, &logger, boost::ref(B), boost::ref(sim));
