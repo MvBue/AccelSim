@@ -4,14 +4,16 @@
 
 Simulation::Simulation(std::string &filename)
 {
+    // Initialize variables
     ddphi = 0.0f;
+    a_target = {0.0f, 0.0f, 0.0f};
     
     // Controller parameters
     k_p = 10.0f;
     k_d = 5.0f;
     
     //  Simulation parameters
-    sim_duration = 30.0f;
+    sim_duration = 15.0f;
     sim_dt = 0.01;
     sim_time = 0.0f;
     sim_done = false;
@@ -22,12 +24,14 @@ Simulation::Simulation(std::string &filename)
         file_reader.display_data();
         time = data.at(1).second;
         t_size = time.size();
-        ay = data.at(9).second;
+        ax = data.at(15).second;
+        ay = data.at(16).second;
+        psi = data.at(10).second;
     }
     
 }
 
-float Simulation::get_target_acceleration(float &t)
+void Simulation::get_target_acceleration(float &t)
 {
     int i_t = 0;
     for (i_t = 0; i_t < t_size; i_t++)
@@ -38,9 +42,9 @@ float Simulation::get_target_acceleration(float &t)
         }
     }
     
-    ay_m = ay.at(i_t - 1) + (t - time.at(i_t - 1)) / (time.at(i_t) - time.at(i_t - 1)) * (ay.at(i_t) - ay.at(i_t - 1));
-    
-    return ay_m;
+    a_target.at(0) = ax.at(i_t - 1) + (t - time.at(i_t - 1)) / (time.at(i_t) - time.at(i_t - 1)) * (ax.at(i_t) - ax.at(i_t - 1));
+    a_target.at(1) = ay.at(i_t - 1) + (t - time.at(i_t - 1)) / (time.at(i_t) - time.at(i_t - 1)) * (ay.at(i_t) - ay.at(i_t - 1));
+    a_target.at(2) = psi.at(i_t - 1) + (t - time.at(i_t - 1)) / (time.at(i_t) - time.at(i_t - 1)) * (psi.at(i_t) - psi.at(i_t - 1));
 }
 
 float Simulation::controller(Body &B)
@@ -72,11 +76,11 @@ void Simulation::simulation_thread(Body &B)
         ddphi = controller(B);
 
         // Set accelerations
-        target_acceleration = get_target_acceleration(t);
-//        target_acceleration = 1.0f;
-        B.set_a_psi(0.0f,target_acceleration,ddphi);
+        get_target_acceleration(t);
+        B.set_a_psi(a_target.at(0), a_target.at(1), ddphi);
+//        B.set_a_psi(0.0f, 1.0f, ddphi);
         
-        std::cout << "simtime " << target_acceleration << std::endl;
+        std::cout << "simtime " << sim_time << std::endl;
         if (t > sim_duration - sim_dt)
         {
             sim_done = true;

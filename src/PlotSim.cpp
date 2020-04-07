@@ -24,7 +24,8 @@ void PlotSim::draw_update(Body &B, Simulation &sim)
         v_pts.pop_back();
         v_pts.push_back(boost::make_tuple(state[1], state[2], state[4] * cos(state[3]) - state[5] * sin(state[3]), state[4] * sin(state[3]) + state[5] * cos(state[3])));
         a_pts.pop_back();
-        a_pts.push_back(boost::make_tuple(state[1], state[2], state[7] /10.0f * cos(state[3]) - state[8] /10.0f * sin(state[3]), state[7] / 10.0f * sin(state[3]) + state[8] /10.0f * cos(state[3])));
+//        a_pts.push_back(boost::make_tuple(state[1], state[2], state[7] /10.0f * cos(state[3]) - state[8] /10.0f * sin(state[3]), state[7] / 10.0f * sin(state[3]) + state[8] /10.0f * cos(state[3])));
+        a_pts.push_back(boost::make_tuple(state[1], state[2], state[7] * cos(state[3]) - state[8] * sin(state[3]), state[7] * sin(state[3]) + state[8] * cos(state[3])));
         
         if (state[0] > freeze_time)
         {

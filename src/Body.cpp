@@ -1,4 +1,5 @@
 #include "Body.h"
+#include <iostream>
 
 Body::Body()
 {
@@ -48,6 +49,7 @@ void Body::advance(float dt)
     
     Xi_IB = Eigen::AngleAxis<float>(I_phi_IB[2], Eigen::Vector3f::UnitZ());
     B_v_IB = B_v_IB + (B_a_IB + B_v_IB.cross(I_omega_IB)) * dt;
+//    B_v_IB = B_v_IB + (B_a_IB) * dt;
     I_omega_IB = I_omega_IB + I_psi_IB * dt;
     I_r_IB = I_r_IB + Xi_IB * B_v_IB * dt;
     I_phi_IB = I_phi_IB + I_omega_IB * dt;

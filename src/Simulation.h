@@ -28,21 +28,21 @@ private:
     float sim_dt;
     float sim_time;
     bool sim_done;
-    
-    float target_acceleration;
-    
+        
     CSVReader file_reader;
     std::vector<std::pair<std::string, std::vector<float>>> data;
     std::vector<float> time;
+    std::vector<float> ax;
     std::vector<float> ay;
+    std::vector<float> psi;
     int t_size;
-    float ay_m;
+    std::vector<float> a_target;
     
 public:
     Simulation(std::string &filename);
     void simulation_thread(Body &B);
     float controller(Body &B);
-    float get_target_acceleration(float &t);
+    void get_target_acceleration(float &t);
     float get_sim_time();
     float get_sim_done();
 };
