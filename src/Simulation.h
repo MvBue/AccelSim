@@ -18,7 +18,13 @@ private:
     float gamma; // angle between the acceleration vector and -I_v_BI
     Eigen::Vector3f gamma_dot;
     
+    float delta;
+    float delta_dot;
+    
+    Eigen::Vector3f r;
+    Eigen::Vector3f phi;
     float ddphi;
+    Eigen::Vector3f grav_comp;
     // Controller parameters
     float k_p;
     float k_d;
@@ -42,6 +48,7 @@ public:
     Simulation(std::string &filename);
     void simulation_thread(Body &B);
     float controller(Body &B);
+    Eigen::Vector3f gravitation_compensation(Body &B);
     void get_target_acceleration(float &t);
     float get_sim_time();
     float get_sim_done();

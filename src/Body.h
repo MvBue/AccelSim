@@ -32,9 +32,11 @@ private:
     float gamma; // angle between the acceleration vector and -I_v_BI
     //TODO: include derivative of acceleration vector into gamma_dot
     Eigen::Vector3f gamma_dot; // derivative of gamma
+    float delta; // angle between the acceleration vector and I_ez_I
+    float delta_dot; // derivative of delta
     
-    Eigen::Vector3f B_ex_B; // x-Axis unit vector in frame B
     Eigen::Vector3f I_ex_B;
+    Eigen::Vector3f I_ez_B;
     
     Eigen::Quaternion<float> Xi_IB;
     
@@ -51,9 +53,9 @@ public:
     float omegai, float a_xi, float a_yi, float psii);
     void display();
     void advance(float dt);
-    void set_r_phi(float xi, float yi, float phii);
-    void set_v_omega(float v_xi, float v_yi, float omegai);
-    void set_a_psi(float a_xi, float a_yi, float psi_i);
+    void set_r_phi(float xi, float yi, float zi, float phi_xi, float phi_yi, float phi_zi);
+    void set_v_omega(float v_xi, float v_yi, float v_zi, float omega_xi, float omega_yi, float omega_zi);
+    void set_a_psi(float a_xi, float a_yi, float a_zi, float psi_xi, float psi_yi, float psi_zi);
     Eigen::Vector3f get_r();
     Eigen::Vector3f get_phi();
     Eigen::Vector3f get_v();
@@ -66,6 +68,8 @@ public:
     Eigen::Vector3f get_beta_dot();
     float get_gamma();
     Eigen::Vector3f get_gamma_dot();
+    float get_delta();
+    float get_delta_dot();
     void set_state();
     Eigen::VectorXf get_state();
     void update_state_vars();

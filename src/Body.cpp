@@ -9,11 +9,8 @@ Body::Body()
     I_omega_IB << 0.0f, 0.0f, 0.0f;
     B_a_IB << 0.0f, 0.0f, 0.0f;
     I_psi_IB << 0.0f, 0.0f, 0.0f;
-    
-    //Declare constants
-    B_ex_B = Eigen::Vector3f::UnitX();
-    
-    state.conservativeResize(15, 1);
+        
+    state.conservativeResize(24, 1);
     new_state = false;
     update_state_vars();
     set_state();
@@ -29,10 +26,7 @@ Body::Body(float xi = 0.0f, float yi = 0.0f, float phii = 0.0f, float v_xi = 0.0
     B_a_IB << a_xi, a_yi, 0.0f;
     I_psi_IB << 0.0f, 0.0f, psii;
     
-    //Declare constants
-    B_ex_B = Eigen::Vector3f::UnitX();
-    
-    state.conservativeResize(15, 1);
+    state.conservativeResize(24, 1);
     new_state = false;
     update_state_vars();
     set_state();
@@ -47,7 +41,7 @@ void Body::display()
 void Body::advance(float dt)
 {
     
-    Xi_IB = Eigen::AngleAxis<float>(I_phi_IB[2], Eigen::Vector3f::UnitZ());
+    Xi_IB = Eigen::AngleAxis<float>(I_phi_IB[0], Eigen::Vector3f::UnitX());
     B_v_IB = B_v_IB + (B_a_IB + B_v_IB.cross(I_omega_IB)) * dt;
 //    B_v_IB = B_v_IB + (B_a_IB) * dt;
     I_omega_IB = I_omega_IB + I_psi_IB * dt;
@@ -60,7 +54,8 @@ void Body::advance(float dt)
 
 void Body::update_state_vars()
 {
-    I_ex_B = Xi_IB * B_ex_B;
+    I_ex_B = Xi_IB * Eigen::Vector3f::UnitX();
+    I_ez_B = Xi_IB * Eigen::Vector3f::UnitZ();
     I_v_IB = Xi_IB * B_v_IB;
     I_a_IB = Xi_IB * B_a_IB;
     
@@ -115,30 +110,39 @@ void Body::update_state_vars()
             rho_instant = (I_a_IB - (I_v_IB.dot(I_a_IB) * I_v_IB / powf(I_v_IB.norm(),2))).norm() / I_v_IB.norm() * Eigen::Vector3f::UnitZ();
             gamma_dot = I_omega_IB - rho_instant;
         }
+        
+    if (I_r_IB.norm() == 0 || I_v_IB.norm() == 0)
+        {
+            delta_dot = 0.0f;
+        } else
+        {
+            delta_dot = I_omega_IB(0);
+        }
 }
 
-void Body::set_r_phi(float xi = 0, float yi = 0, float phii = 0)
+void Body::set_r_phi(float xi = 0, float yi = 0, float zi = 0, float phi_xi = 0, float phi_yi = 0, float phi_zi = 0)
 {
-    I_r_IB << xi, yi, 0.0f;
-    I_phi_IB << 0.0f, 0.0f, phii;
+    I_r_IB << xi, yi, zi;
+    I_phi_IB << phi_xi, phi_yi, phi_zi;
 }
 
-void Body::set_v_omega(float v_xi = 0, float v_yi = 0, float omegai = 0)
+void Body::set_v_omega(float v_xi = 0, float v_yi = 0, float v_zi = 0, float omega_xi = 0, float omega_yi = 0, float omega_zi = 0)
 {
-    B_v_IB << v_xi, v_yi, 0.0f;
-    I_omega_IB << 0.0f, 0.0f, omegai;
+    B_v_IB << v_xi, v_yi, v_zi;
+    I_omega_IB << omega_xi, omega_yi, omega_zi;
 }
 
-void Body::set_a_psi(float a_xi = 0, float a_yi = 0, float psii = 0)
+void Body::set_a_psi(float a_xi = 0.0f, float a_yi = 0.0f, float a_zi = 0.0f, float psi_xi = 0.0f, float psi_yi = 0.0f, float psi_zi = 0.0f)
 {
-    B_a_IB << a_xi, a_yi, 0.0f;
-    I_psi_IB << 0.0f, 0.0f, psii;
+    B_a_IB << a_xi, a_yi, a_zi;
+    I_psi_IB << psi_xi, psi_yi, psi_zi;
 }
 
 void Body::set_state()
 {
     boost::unique_lock<boost::mutex> lock{mutex};
-    state << I_r_IB[0], I_r_IB[1], I_phi_IB[2], B_v_IB[0], B_v_IB[1], I_omega_IB[2], B_a_IB[0], B_a_IB[1], I_psi_IB[2], 
+    state << I_r_IB[0], I_r_IB[1], I_r_IB[2], I_phi_IB[0], I_phi_IB[1], I_phi_IB[2], B_v_IB[0], B_v_IB[1], B_v_IB[2], 
+    I_omega_IB[0], I_omega_IB[1], I_omega_IB[2], B_a_IB[0], B_a_IB[1], B_a_IB[2], I_psi_IB[0], I_psi_IB[1], I_psi_IB[2], 
     alpha, alpha_dot[2], beta, beta_dot[2], gamma, gamma_dot[2];
     cond.notify_all();
 }
@@ -209,4 +213,14 @@ float Body::get_gamma()
 Eigen::Vector3f Body::get_gamma_dot()
 {
     return gamma_dot;
+}
+
+float Body::get_delta()
+{
+    return delta;
+}
+
+float Body::get_delta_dot()
+{
+    return delta_dot;
 }

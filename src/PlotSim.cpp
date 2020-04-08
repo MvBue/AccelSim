@@ -7,7 +7,7 @@ PlotSim::PlotSim()
     v_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
     a_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
     orig_pts.push_back(boost::make_tuple(0.0,0.0,0.0,0.0));
-    state.conservativeResize(16, 1);
+    state.conservativeResize(25, 1);
 }
 
 void PlotSim::draw_update(Body &B, Simulation &sim)
@@ -16,26 +16,26 @@ void PlotSim::draw_update(Body &B, Simulation &sim)
     {
         state << sim.get_sim_time(), B.get_state();
                 
-        xy_pts.push_back(std::make_pair(state[1], state[2]));
+        yz_pts.push_back(std::make_pair(state[2], state[3]));
         heads.pop_back();
-        heads.push_back(boost::make_tuple(state[1],state[2], cos(state[3]), sin(state[3])));
+        heads.push_back(boost::make_tuple(state[2],state[3], -sin(state[4]), cos(state[4])));
         orig_pts.pop_back();
-        orig_pts.push_back(boost::make_tuple(0.0f, 0.0f, state[1], state[2]));
+        orig_pts.push_back(boost::make_tuple(0.0f, 0.0f, state[2], state[3]));
         v_pts.pop_back();
-        v_pts.push_back(boost::make_tuple(state[1], state[2], state[4] * cos(state[3]) - state[5] * sin(state[3]), state[4] * sin(state[3]) + state[5] * cos(state[3])));
+        v_pts.push_back(boost::make_tuple(state[2], state[3], state[8] * cos(state[4]) - state[9] * sin(state[4]), state[8] * sin(state[4]) + state[9] * cos(state[4])));
         a_pts.pop_back();
 //        a_pts.push_back(boost::make_tuple(state[1], state[2], state[7] /10.0f * cos(state[3]) - state[8] /10.0f * sin(state[3]), state[7] / 10.0f * sin(state[3]) + state[8] /10.0f * cos(state[3])));
-        a_pts.push_back(boost::make_tuple(state[1], state[2], state[7] * cos(state[3]) - state[8] * sin(state[3]), state[7] * sin(state[3]) + state[8] * cos(state[3])));
+        a_pts.push_back(boost::make_tuple(state[2], state[3], state[14] * cos(state[4]) - state[15] * sin(state[4]), state[14] * sin(state[4]) + state[15] * cos(state[4]))); 
         
         if (state[0] > freeze_time)
         {
-            heads.push_back(boost::make_tuple(state[1],state[2], cos(state[3]), sin(state[3])));
+            heads.push_back(boost::make_tuple(state[2],state[3], cos(state[4]), sin(state[4])));
             freeze_time += 1.0f;
         }
         
-        gp << "plot '-' binary" << gp.binFmt1d(xy_pts, "record") << 
+        gp << "plot '-' binary" << gp.binFmt1d(yz_pts, "record") << 
         "with lines title 'path', '-' with vectors title 'heading', '-' with vectors title 'I r IB', '-' with vectors title 'I v IB', '-' with vectors title 'I a IB'\n";
-        gp.sendBinary1d(xy_pts);
+        gp.sendBinary1d(yz_pts);
         gp.send1d(heads);
         gp.send1d(orig_pts);
         gp.send1d(v_pts);

@@ -31,7 +31,7 @@ private:
     std::vector<std::pair<double, double> > ydot_pts;
     std::vector<std::pair<double, double> > phidot_pts;
     
-    std::vector<std::pair<double, double> > xy_pts;
+    std::vector<std::pair<double, double> > yz_pts;
 	std::vector<boost::tuple<double, double, double, double> > heads;
 	std::vector<boost::tuple<double, double, double, double> > v_pts;
 	std::vector<boost::tuple<double, double, double, double> > a_pts;
